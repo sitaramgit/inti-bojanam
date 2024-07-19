@@ -22,52 +22,28 @@ import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';
 import GoogleIcon from '@mui/icons-material/Google';
 import Link from '@mui/material/Link';
 import { useRouter } from "next/router";
+import { useForm } from "react-hook-form"
 import { authService } from "../../services/auth";
 
+type FormData = {
+    firstName: string;
+    lastName: string;
+    email: string;
+    mobile: number;
+  }
 
-const Login = () => {
-    const router = useRouter()
-    const responseMessage = (response: any) => {
-        console.log(response);
-    };
-    const errorMessage = (error: any) => {
-        console.log(error);
-    };
-    const login = useGoogleLogin({
-        onSuccess: (codeResponse) => {
-            axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${codeResponse.access_token}`, {
-                headers: {
-                    Authorization: `Bearer ${codeResponse.access_token}`,
-                    Accept: 'application/json'
-                }
-            })
-                .then((res: any) => {
-                    console.log(res)
-                    // setProfile(res.data);
-                    const payload = {
-                        firstName: res.data.given_name,
-                        lastName: res.data.family_name,
-                        email: res.data.email,
-                        socialName: res.data.name,
-                        socialPicture: res.data.picture,
-                        token: codeResponse.access_token,
-                    }
-                    authService.createUser(payload)
-                    console.log("data assigned");
-                })
-                .catch((err) => console.log(err));
-        },
-        onError: (error) => console.log('Login Failed:', error)
-    });
-    const [expanded, setExpanded] = React.useState(false);
+const SighUp = () => {
+    const router = useRouter();
+    const {
+        register,
+        setValue,
+        handleSubmit,
+        formState: { errors },
+      } = useForm<FormData>()
+      const onSubmit = handleSubmit((data) => {
+        authService.createUser(data)
+      })
 
-    const handleExpandClick = () => {
-        setExpanded(!expanded);
-    };
-    const handleClick = (e: any) => {
-        e.preventDefault()
-        router.push('/sign-up')
-      }
     return (
         <>
             <Grid container spacing={3}>
@@ -78,28 +54,52 @@ const Login = () => {
                     <Box marginTop={'10%'}>
                     <Card>
                         <CardContent>
-                            <form>
+                            <form onSubmit={onSubmit}>
                                 <TextField
                                     required
                                     id="outlined-required"
-                                    label="User Name"
+                                    label="First Name"
+                                    defaultValue=""
+                                    fullWidth
+                                    margin="normal"
+                                    helperText={errors.firstName && "Please enter your name"} 
+                                    {...register("firstName", { required: true, min: 3, max: 15 })}
+                                />
+                                <TextField
+                                    required
+                                    id="outlined-required"
+                                    label="Last Name"
                                     defaultValue=""
                                     fullWidth
                                     margin="normal"
                                     helperText="Please enter your name"
+                                    {...register("lastName", { required: true, min: 1, max: 15 })}
                                 />
                                 <TextField
                                     required
-                                    id="outlined-password-input"
-                                    label="Password"
-                                    type="password"
-                                    autoComplete="current-password"
+                                    id="outlined-required"
+                                    label="email"
+                                    defaultValue=""
+                                    type="email"
                                     fullWidth
                                     margin="normal"
-                                    helperText="Please enter password"
+                                    helperText="Please enter Email"
+                                    {...register("email", { required: true, min: 3, max: 50 })}
                                 />
-                                <Button variant="contained" size="large" fullWidth={true} startIcon={<VpnKeyOutlinedIcon />}>
-                                    Login
+                                <TextField
+                                    required
+                                    id="outlined-required"
+                                    label="Mobile"
+                                    defaultValue=""
+                                    type="number"
+                                    fullWidth
+                                    margin="normal"
+                                    helperText="Please enter Mobile"
+                                    {...register("mobile", { required: true })}
+                                />
+                                
+                                <Button type="submit" variant="contained" color="success" size="large" fullWidth={true} startIcon={<VpnKeyOutlinedIcon />}>
+                                    Sign Up
                                 </Button>
                             </form>
                             <Box
@@ -114,18 +114,14 @@ const Login = () => {
                                     },
                                 }}
                             >
-                                <Link underline="always" sx={{cursor: 'pointer'}} onClick={handleClick}>
-                                    Regester here..
+                                <Link  underline="always" sx={{cursor: 'pointer'}} onClick={() => router.push('/login')}>
+                                    Login here..
                                 </Link>
 
                             </Box>
-                            <Typography align="center" variant="h6">OR</Typography>
 
                         </CardContent>
                         <CardActions disableSpacing>
-                            <Button variant="outlined" color="error" size="large" onClick={() => { login() }} fullWidth={true} startIcon={<GoogleIcon />}>
-                                Sign in with google
-                            </Button>
                         </CardActions>
 
                     </Card>
@@ -138,4 +134,4 @@ const Login = () => {
     )
 }
 
-export default Login;
+export default SighUp;

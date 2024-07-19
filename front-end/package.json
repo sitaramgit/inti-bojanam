@@ -13,11 +13,18 @@
     "@capacitor/android": "^6.1.1",
     "@capacitor/core": "^6.1.1",
     "@capacitor/ios": "^6.1.1",
+    "@emotion/react": "^11.12.0",
+    "@emotion/styled": "^11.12.0",
+    "@mui/icons-material": "^5.16.4",
+    "@mui/material": "^5.16.4",
+    "@mui/styled-engine-sc": "^6.0.0-alpha.18",
     "@react-oauth/google": "^0.12.1",
     "axios": "^1.7.2",
     "next": "14.2.5",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "react-hook-form": "^7.52.1",
+    "styled-components": "^6.1.12"
   },
   "devDependencies": {
     "@capacitor/cli": "^6.1.1",

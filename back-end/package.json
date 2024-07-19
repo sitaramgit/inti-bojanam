@@ -17,6 +17,7 @@
     "@types/body-parser": "^1.19.5",
     "@types/mysql": "^2.15.26",
     "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "mysql": "^2.18.1",
