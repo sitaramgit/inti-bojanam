@@ -9,4 +9,4 @@ export const generateRandomPassword = (length: number) => {
   }
 
   export const CLIENT_ID = 'jaklsdfjoiarujlakdsjfaklsdfjkladsfj';
-  export const CLIENT_SECRET = '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';
+  export const CLIENT_SECRET = 'oeritpoerwitpoertiop';
