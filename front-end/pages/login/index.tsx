@@ -34,29 +34,34 @@ const Login = () => {
         console.log(error);
     };
     const login = useGoogleLogin({
-        onSuccess: (codeResponse) => {
-            axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${codeResponse.access_token}`, {
-                headers: {
-                    Authorization: `Bearer ${codeResponse.access_token}`,
-                    Accept: 'application/json'
-                }
-            })
-                .then((res: any) => {
-                    console.log(res)
-                    // setProfile(res.data);
-                    const payload = {
-                        firstName: res.data.given_name,
-                        lastName: res.data.family_name,
-                        email: res.data.email,
-                        socialName: res.data.name,
-                        socialPicture: res.data.picture,
-                        token: codeResponse.access_token,
-                    }
-                    authService.createUser(payload)
-                    console.log("data assigned");
-                })
-                .catch((err) => console.log(err));
+        onSuccess: async ({code}) => {
+            // console.log(codeResponse)
+            authService.sorialLogin(code)
+            // return false;
+            // axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${codeResponse.access_token}`, {
+            //     headers: {
+            //         Authorization: `Bearer ${codeResponse.access_token}`,
+            //         Accept: 'application/json'
+            //     }
+            // })
+            //     .then((res: any) => {
+            //         console.log(res)
+            //         // setProfile(res.data);
+            //         const payload = {
+            //             firstName: res.data.given_name,
+            //             lastName: res.data.family_name,
+            //             email: res.data.email,
+            //             socialName: res.data.name,
+            //             socialPicture: res.data.picture,
+            //             token: codeResponse.access_token,
+            //             isSocialUser: true
+            //         }
+            //         authService.sorialLogin(payload)
+            //         console.log("data assigned");
+            //     })
+            //     .catch((err) => console.log(err));
         },
+        flow: 'auth-code',
         onError: (error) => console.log('Login Failed:', error)
     });
     const [expanded, setExpanded] = React.useState(false);
