@@ -8,5 +8,5 @@ export const generateRandomPassword = (length: number) => {
     return password;
   }
 
-  export const CLIENT_ID = 'jaklsdfjoiarujlakdsjfaklsdfjkladsfj';
-  export const CLIENT_SECRET = 'oeritpoerwitpoertiop';
+  export const CLIENT_ID = '';
+  export const CLIENT_SECRET = '';
