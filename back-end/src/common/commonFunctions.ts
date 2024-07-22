@@ -8,5 +8,5 @@ export const generateRandomPassword = (length: number) => {
     return password;
   }
 
-  export const CLIENT_ID = '905840306296-efb2tdlchip2jmcdq4s2jv1323tkh2ak.apps.googleusercontent.com';
+  export const CLIENT_ID = 'jaklsdfjoiarujlakdsjfaklsdfjkladsfj';
   export const CLIENT_SECRET = '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';
