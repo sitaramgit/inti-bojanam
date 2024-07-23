@@ -14,11 +14,20 @@ const createUser = (payload: any) => {
 
 const sorialLogin = (code: any) => {
     console.log(code)
-    axios.post('http://localhost:3000/auth/socialLogin', {code}).then((res: any) => console.log(res)).catch(e=>console.log(e))
+    axios.post('http://localhost:3000/auth/socialLogin', {code}).then((res: any) => {
+        if(res?.data?.access_token) localStorage.setItem('access_token', res.data.token)
+    }).catch(e=>console.log(e))
   }
 
+  const loginUser = (payload: any) => {
+    console.log(payload)
+    axios.post('http://localhost:3000/auth/login', payload).then((res: any) => {
+        if(res?.data?.token) localStorage.setItem('access_token', res.data.token)
+    }).catch(e=>console.log(e))
+  }
 
 export const authService = {
     createUser,
-    sorialLogin
+    sorialLogin,
+    loginUser
 }

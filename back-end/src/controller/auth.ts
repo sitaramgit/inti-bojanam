@@ -3,6 +3,8 @@ import { Request, Response, NextFunction } from 'express';
 import connection from '../config/db.config';
 import { generateRandomPassword } from '../common/commonFunctions';
 import { OAuth2Client, TokenPayload } from 'google-auth-library';
+const jwt = require('jsonwebtoken');
+
 const auth = express.Router();
 // const client = new OAuth2Client(process.env.CLIENT_ID);
 
@@ -29,11 +31,30 @@ auth.use((req: Request, res: Response, next: NextFunction) => {
   })
 
   auth.get('/', (req: any, res: any) => {
+    
     res.send('hey google')
   })
 
   auth.post('/login', (req: any, res: any) => {
-    res.send(req)
+    const {email, password} = req.body;
+    
+     connection.query('SELECT * FROM users WHERE email = ? and password = ?', [email, password], (err, result: any) => {
+        // console.log(result)
+        if(result?.length){
+            const userDeta = result[0];
+            const token = jwt.sign({ id: userDeta.id, email: userDeta.email }, 'your-secret-key', {
+                expiresIn: '8h',
+                });
+                res.status(200).json({ token });
+        }else{
+            return res.status(401).json({ error: 'Authentication failed' });
+        }
+        
+        res.send(result)
+     });
+
+    
+    
   })
 
 
@@ -105,7 +126,33 @@ const oAuth2Client = new OAuth2Client(
 
   auth.post('/socialLogin', async (req: any, res: any) => {
     const { tokens } = await oAuth2Client.getToken(req.body.code);
-    console.log(tokens);
+    const googleToken = jwt.decode(tokens.id_token)
+    connection.query('SELECT * FROM users WHERE email', [googleToken.email], (err, result: any) => {
+        // console.log(result)
+        if(result?.length){
+            res.json(tokens);
+        }else{
+            const payload = {
+                firstName: googleToken.given_name,
+                lastName: googleToken.family_name,
+                email: googleToken.email,
+                socialName: googleToken.name,
+                socialPicture: googleToken.picture,
+                token: tokens.id_token,
+                isSocialUser: true
+            }
+            connection.query('INSERT INTO users SET ?', { ...payload, password: generateRandomPassword(5) }, (err, result) => {
+                console.log(result)
+                if (err) {
+                    console.error('Error creating record: ', err);
+                    res.status(500).send('Error creating record');
+                    return;
+                }
+
+                res.json(tokens);
+            });
+        }})
+    console.log(tokens, googleToken);
   
   res.json(tokens);
   })

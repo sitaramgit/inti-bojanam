@@ -16,6 +16,7 @@ const express_1 = __importDefault(require("express"));
 const db_config_1 = __importDefault(require("../config/db.config"));
 const commonFunctions_1 = require("../common/commonFunctions");
 const google_auth_library_1 = require("google-auth-library");
+const jwt = require('jsonwebtoken');
 const auth = express_1.default.Router();
 // const client = new OAuth2Client(process.env.CLIENT_ID);
 auth.use((req, res, next) => {
@@ -41,7 +42,21 @@ auth.get('/', (req, res) => {
     res.send('hey google');
 });
 auth.post('/login', (req, res) => {
-    res.send(req);
+    const { email, password } = req.body;
+    db_config_1.default.query('SELECT * FROM users WHERE email = ? and password = ?', [email, password], (err, result) => {
+        // console.log(result)
+        if (result === null || result === void 0 ? void 0 : result.length) {
+            const userDeta = result[0];
+            const token = jwt.sign({ id: userDeta.id, email: userDeta.email }, 'your-secret-key', {
+                expiresIn: '8h',
+            });
+            res.status(200).json({ token });
+        }
+        else {
+            return res.status(401).json({ error: 'Authentication failed' });
+        }
+        res.send(result);
+    });
 });
 // Middleware to verify the Google access token
 // const verifyToken = async (req: any, res: Response, next: NextFunction) => {
@@ -95,7 +110,34 @@ auth.post('/login', (req, res) => {
 const oAuth2Client = new google_auth_library_1.OAuth2Client(process.env.CLIENT_ID, process.env.CLIENT_SECRET, 'postmessage');
 auth.post('/socialLogin', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { tokens } = yield oAuth2Client.getToken(req.body.code);
-    console.log(tokens);
+    const googleToken = jwt.decode(tokens.id_token);
+    db_config_1.default.query('SELECT * FROM users WHERE email', [googleToken.email], (err, result) => {
+        // console.log(result)
+        if (result === null || result === void 0 ? void 0 : result.length) {
+            res.json(tokens);
+        }
+        else {
+            const payload = {
+                firstName: googleToken.given_name,
+                lastName: googleToken.family_name,
+                email: googleToken.email,
+                socialName: googleToken.name,
+                socialPicture: googleToken.picture,
+                token: tokens.id_token,
+                isSocialUser: true
+            };
+            db_config_1.default.query('INSERT INTO users SET ?', Object.assign(Object.assign({}, payload), { password: (0, commonFunctions_1.generateRandomPassword)(5) }), (err, result) => {
+                console.log(result);
+                if (err) {
+                    console.error('Error creating record: ', err);
+                    res.status(500).send('Error creating record');
+                    return;
+                }
+                res.json(tokens);
+            });
+        }
+    });
+    console.log(tokens, googleToken);
     res.json(tokens);
 }));
 exports.default = auth;

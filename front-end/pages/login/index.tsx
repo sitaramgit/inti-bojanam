@@ -23,17 +23,31 @@ import GoogleIcon from '@mui/icons-material/Google';
 import Link from '@mui/material/Link';
 import { useRouter } from "next/router";
 import { authService } from "../../services/auth";
+import { useForm } from "react-hook-form";
 
-
+type FormData = {
+    email: string;
+    password: string;
+  }
 const Login = () => {
     const router = useRouter()
+    const {
+        register,
+        setValue,
+        handleSubmit,
+        formState: { errors },
+      } = useForm<FormData>()
+      const onSubmit = handleSubmit((data) => {
+        console.log(data)
+        authService.loginUser(data);
+      })
     const responseMessage = (response: any) => {
         console.log(response);
     };
     const errorMessage = (error: any) => {
         console.log(error);
     };
-    const login = useGoogleLogin({
+    const loginWithGoogle = useGoogleLogin({
         onSuccess: async ({code}) => {
             // console.log(codeResponse)
             authService.sorialLogin(code)
@@ -73,6 +87,10 @@ const Login = () => {
         e.preventDefault()
         router.push('/sign-up')
       }
+    
+      const loginUser = () => {
+
+      }
     return (
         <>
             <Grid container spacing={3}>
@@ -83,15 +101,17 @@ const Login = () => {
                     <Box marginTop={'10%'}>
                     <Card>
                         <CardContent>
-                            <form>
+                            <form onSubmit={onSubmit}>
                                 <TextField
                                     required
                                     id="outlined-required"
-                                    label="User Name"
+                                    label="email"
                                     defaultValue=""
                                     fullWidth
                                     margin="normal"
-                                    helperText="Please enter your name"
+                                    type="email"
+                                    helperText="Please enter email"
+                                    {...register("email", { required: true, min: 3, max: 15 })}
                                 />
                                 <TextField
                                     required
@@ -102,8 +122,9 @@ const Login = () => {
                                     fullWidth
                                     margin="normal"
                                     helperText="Please enter password"
+                                    {...register("password", { required: true, min: 3, max: 10 })}
                                 />
-                                <Button variant="contained" size="large" fullWidth={true} startIcon={<VpnKeyOutlinedIcon />}>
+                                <Button variant="contained" type="submit" size="large" fullWidth={true} startIcon={<VpnKeyOutlinedIcon />}>
                                     Login
                                 </Button>
                             </form>
@@ -128,7 +149,7 @@ const Login = () => {
 
                         </CardContent>
                         <CardActions disableSpacing>
-                            <Button variant="outlined" color="error" size="large" onClick={() => { login() }} fullWidth={true} startIcon={<GoogleIcon />}>
+                            <Button variant="outlined" color="error" size="large" onClick={() => { loginWithGoogle() }} fullWidth={true} startIcon={<GoogleIcon />}>
                                 Sign in with google
                             </Button>
                         </CardActions>
