@@ -1,167 +1,165 @@
 import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
-import axios from "axios";
-import * as React from 'react';
-import { styled } from '@mui/material/styles';
-import Card from '@mui/material/Card';
-import CardHeader from '@mui/material/CardHeader';
-import CardMedia from '@mui/material/CardMedia';
-import CardContent from '@mui/material/CardContent';
-import CardActions from '@mui/material/CardActions';
-import Collapse from '@mui/material/Collapse';
-import Avatar from '@mui/material/Avatar';
-import IconButton, { IconButtonProps } from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import { red } from '@mui/material/colors';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import ShareIcon from '@mui/icons-material/Share';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import Container from '@mui/material/Container';
+
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import CardActions from "@mui/material/CardActions";
+import Typography from "@mui/material/Typography";
 import { Box, Button, Grid, TextField } from "@mui/material";
-import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';
-import GoogleIcon from '@mui/icons-material/Google';
-import Link from '@mui/material/Link';
+import VpnKeyOutlinedIcon from "@mui/icons-material/VpnKeyOutlined";
+import GoogleIcon from "@mui/icons-material/Google";
+import Link from "@mui/material/Link";
 import { useRouter } from "next/router";
 import { authService } from "../../services/auth";
 import { useForm } from "react-hook-form";
+import { apiService } from "../../services/apiService";
+import { API_REQUESTS } from "../../common/apiRequests";
+import SnackbarMsg from "../../commonUI/snakBar";
+import { useState } from "react";
 
 type FormData = {
-    email: string;
-    password: string;
-  }
+  email: string;
+  password: string;
+};
+
 const Login = () => {
-    const router = useRouter()
-    const {
-        register,
-        setValue,
-        handleSubmit,
-        formState: { errors },
-      } = useForm<FormData>()
-      const onSubmit = handleSubmit((data) => {
-        console.log(data)
-        authService.loginUser(data);
-      })
-    const responseMessage = (response: any) => {
-        console.log(response);
-    };
-    const errorMessage = (error: any) => {
+
+  const router = useRouter();
+  const [expanded, setExpanded] = useState(false);
+   const [error, setError] = useState<boolean>(false);
+  const {
+    register,
+    setValue,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>();
+
+  const onSubmit =  handleSubmit((data) => {
+    login(data);
+    //  authService.loginUser(data);
+  });
+  
+  const login = async (data: any) => {
+    API_REQUESTS.USER_LOGIN.PAYLOAD = data;
+    try {
+        const request = await apiService(API_REQUESTS.USER_LOGIN);
+        console.log(request);
+    } catch (error) {
+        // return <SnackbarMsg/>
+        setError(true)
         console.log(error);
-    };
-    const loginWithGoogle = useGoogleLogin({
-        onSuccess: async ({code}) => {
-            // console.log(codeResponse)
-            authService.sorialLogin(code)
-            // return false;
-            // axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${codeResponse.access_token}`, {
-            //     headers: {
-            //         Authorization: `Bearer ${codeResponse.access_token}`,
-            //         Accept: 'application/json'
-            //     }
-            // })
-            //     .then((res: any) => {
-            //         console.log(res)
-            //         // setProfile(res.data);
-            //         const payload = {
-            //             firstName: res.data.given_name,
-            //             lastName: res.data.family_name,
-            //             email: res.data.email,
-            //             socialName: res.data.name,
-            //             socialPicture: res.data.picture,
-            //             token: codeResponse.access_token,
-            //             isSocialUser: true
-            //         }
-            //         authService.sorialLogin(payload)
-            //         console.log("data assigned");
-            //     })
-            //     .catch((err) => console.log(err));
-        },
-        flow: 'auth-code',
-        onError: (error) => console.log('Login Failed:', error)
-    });
-    const [expanded, setExpanded] = React.useState(false);
+    }
+  }
 
-    const handleExpandClick = () => {
-        setExpanded(!expanded);
-    };
-    const handleClick = (e: any) => {
-        e.preventDefault()
-        router.push('/sign-up')
-      }
-    
-      const loginUser = () => {
+  const loginWithGoogle = useGoogleLogin({
+    onSuccess: async ({ code }) => {
+      authService.socialLogin(code);
+    },
+    flow: "auth-code",
+    onError: (error) => console.log("Login Failed:", error),
+  });
+0
 
-      }
-    return (
-        <>
-            <Grid container spacing={3}>
-                <Grid item xs>
 
-                </Grid>
-                <Grid item md={6}>
-                    <Box marginTop={'10%'}>
-                    <Card>
-                        <CardContent>
-                            <form onSubmit={onSubmit}>
-                                <TextField
-                                    required
-                                    id="outlined-required"
-                                    label="email"
-                                    defaultValue=""
-                                    fullWidth
-                                    margin="normal"
-                                    type="email"
-                                    helperText="Please enter email"
-                                    {...register("email", { required: true, min: 3, max: 15 })}
-                                />
-                                <TextField
-                                    required
-                                    id="outlined-password-input"
-                                    label="Password"
-                                    type="password"
-                                    autoComplete="current-password"
-                                    fullWidth
-                                    margin="normal"
-                                    helperText="Please enter password"
-                                    {...register("password", { required: true, min: 3, max: 10 })}
-                                />
-                                <Button variant="contained" type="submit" size="large" fullWidth={true} startIcon={<VpnKeyOutlinedIcon />}>
-                                    Login
-                                </Button>
-                            </form>
-                            <Box
-                                sx={{
-                                    marginTop: '10px',
-                                    display: 'flex',
-                                    flexWrap: 'wrap',
-                                    justifyContent: 'center',
-                                    typography: 'body1',
-                                    '& > :not(style) ~ :not(style)': {
-                                        ml: 2,
-                                    },
-                                }}
-                            >
-                                <Link underline="always" sx={{cursor: 'pointer'}} onClick={handleClick}>
-                                    Regester here..
-                                </Link>
+  const handleExpandClick = () => {
+    setExpanded(!expanded);
+  };
 
-                            </Box>
-                            <Typography align="center" variant="h6">OR</Typography>
+  const handleClick = (e: any) => {
+    e.preventDefault();
+    router.push("/sign-up");
+  };
 
-                        </CardContent>
-                        <CardActions disableSpacing>
-                            <Button variant="outlined" color="error" size="large" onClick={() => { loginWithGoogle() }} fullWidth={true} startIcon={<GoogleIcon />}>
-                                Sign in with google
-                            </Button>
-                        </CardActions>
-
-                    </Card>
-                    </Box>
-                </Grid>
-                <Grid item xs>
-                </Grid>
-            </Grid>
-        </>
-    )
-}
+  return (
+    <>
+    <SnackbarMsg open={error} message={'login failed'}/>
+      <Grid container spacing={3}>
+        <Grid item xs></Grid>
+        <Grid item md={6}>
+          <Box marginTop={"10%"}>
+            <Card>
+              <CardContent>
+                <form onSubmit={onSubmit}>
+                  <TextField
+                    required
+                    id="outlined-required"
+                    label="email"
+                    defaultValue=""
+                    fullWidth
+                    margin="normal"
+                    type="email"
+                    helperText="Please enter email"
+                    {...register("email", { required: true, min: 3, max: 15 })}
+                  />
+                  <TextField
+                    required
+                    id="outlined-password-input"
+                    label="Password"
+                    type="password"
+                    autoComplete="current-password"
+                    fullWidth
+                    margin="normal"
+                    helperText="Please enter password"
+                    {...register("password", {
+                      required: true,
+                      min: 3,
+                      max: 10,
+                    })}
+                  />
+                  <Button
+                    variant="contained"
+                    type="submit"
+                    size="large"
+                    fullWidth={true}
+                    startIcon={<VpnKeyOutlinedIcon />}
+                  >
+                    Login
+                  </Button>
+                </form>
+                <Box
+                  sx={{
+                    marginTop: "10px",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    justifyContent: "center",
+                    typography: "body1",
+                    "& > :not(style) ~ :not(style)": {
+                      ml: 2,
+                    },
+                  }}
+                >
+                  <Link
+                    underline="always"
+                    sx={{ cursor: "pointer" }}
+                    onClick={handleClick}
+                  >
+                    Regester here..
+                  </Link>
+                </Box>
+                <Typography align="center" variant="h6">
+                  OR
+                </Typography>
+              </CardContent>
+              <CardActions disableSpacing>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  size="large"
+                  onClick={() => {
+                    loginWithGoogle();
+                  }}
+                  fullWidth={true}
+                  startIcon={<GoogleIcon />}
+                >
+                  Sign in with google
+                </Button>
+              </CardActions>
+            </Card>
+          </Box>
+        </Grid>
+        <Grid item xs></Grid>
+      </Grid>
+    </>
+  );
+};
 
 export default Login;
