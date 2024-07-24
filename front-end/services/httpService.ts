@@ -3,7 +3,7 @@ import { IApiService } from "../common/interface"
 import { apiEndPoints } from "../common/apiEndPoints";
 
 
-export const apiService = async (request: IApiService) => {
+export const httpService = async (request: IApiService) => {
 
     const httpRequest: any =  {
         POST: async (postRequest: IApiService) => {

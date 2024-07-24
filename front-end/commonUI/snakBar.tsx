@@ -20,7 +20,7 @@ const SnackbarMsg = ({open,message}: any) => {
         message={message}
         key={vertical + horizontal}
         autoHideDuration={1200}
-        color='red'
+        color="primary"
         
       />
       );
