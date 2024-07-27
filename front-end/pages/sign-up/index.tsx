@@ -1,10 +1,10 @@
 
-import SighUp from "../../components/auth/SighUp";
+import SignUp from "../../components/auth/SignUp";
 
-const SighUpPage = () => {
+const SignUpPage = () => {
     return (
-        <SighUp/>
+        <SignUp/>
       );
 };
 
-export default SighUpPage;
+export default SignUpPage;

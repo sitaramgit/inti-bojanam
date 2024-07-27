@@ -26,18 +26,43 @@ auth.use((req, res, next) => {
 auth.post('/', (req, res) => {
     res.send(req.body);
 });
-auth.post('/register', (req, res) => {
+auth.post('/register', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, firstName, lastName, mobile } = req.body;
-    db_config_1.default.query('INSERT INTO users SET ?', Object.assign(Object.assign({}, req.body), { password: (0, commonFunctions_1.generateRandomPassword)(5) }), (err, result) => {
-        console.log(result);
+    // Check if the email already exists
+    db_config_1.default.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
         if (err) {
-            console.error('Error creating record: ', err);
-            res.status(500).send('Error creating record');
+            console.error('Error checking email: ', err);
+            res.status(500).json({
+                success: false,
+                message: 'Error processing request',
+                error: err.message
+            });
             return;
         }
-        res.send(result);
+        if (results.length > 0) {
+            res.status(400).json({
+                success: false,
+                message: 'Email already exists'
+            });
+            return;
+        }
+        db_config_1.default.query('INSERT INTO users SET ?', Object.assign(Object.assign({}, req.body), { password: (0, commonFunctions_1.generateRandomPassword)(5) }), (err, result) => {
+            if (err) {
+                console.error('Error creating record: ', err);
+                res.status(500).json({
+                    success: false,
+                    message: 'Error processing request',
+                    error: err.message
+                });
+                return;
+            }
+            res.json({
+                success: true,
+                data: result
+            });
+        });
     });
-});
+}));
 auth.get('/', (req, res) => {
     res.send('hey google');
 });
@@ -58,86 +83,74 @@ auth.post('/login', (req, res) => {
         res.send(result);
     });
 });
-// Middleware to verify the Google access token
-// const verifyToken = async (req: any, res: Response, next: NextFunction) => {
-//     const authHeader = req.headers['authorization'];
-//     if (!authHeader) {
-//       return res.status(401).json({ error: 'Unauthorized' });
-//     }
-//     const token = authHeader.split(' ')[1];
-//     const ticket = await client.verifyIdToken({
-//         idToken: token,
-//         audience: CLIENT_ID,
-//       });
-//       console.log(ticket, 4444444444)
-//       const payload: TokenPayload | undefined = ticket.getPayload();
-//       console.log(payload,333333)
-//     try {
-//       if (!payload) {
-//         return res.status(401).json({ error: 'Unauthorized' });
-//       }
-//       // Check if the user exists in the database
-//       const rows: any = await connection.query('SELECT * FROM users WHERE email = ?', [payload.email]);
-//       if ((rows as any[]).length === 0) {
-//         return res.status(401).json({ error: 'User not found' });
-//       }
-//       req.user = (rows as any[])[0];
-//       next();
-//     } catch (error) {
-//       console.error(error);
-//       res.status(401).json({ error: 'Unauthorized' });
-//     }
-//   };
-//   const verifyToken2 = async (req: any, res: Response, next: NextFunction) => {
-//     const authHeader = req.headers['authorization'];
-//     const token = authHeader.split(' ')[1];
-//     console.log(authHeader, 1111111);
-//     console.log(token, 222222)
-//     const ticket = await client.verifyIdToken({
-//         idToken: token,
-//         audience: CLIENT_ID,  // Specify the CLIENT_ID of the app that accesses the backend
-//         // Or, if multiple clients access the backend:
-//         //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
-//     });
-//     console.log(ticket, 333333)
-//     const payload = await ticket.getPayload();
-//     console.log(payload, 444444444)
-//     return payload;
-//   }
-//   const CLIENT_ID = XXX
-// const CLIENT_SECRET = XXX
-// initialize oathclient
 const oAuth2Client = new google_auth_library_1.OAuth2Client(process.env.CLIENT_ID, process.env.CLIENT_SECRET, 'postmessage');
 auth.post('/socialLogin', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { tokens } = yield oAuth2Client.getToken(req.body.code);
-    const googleToken = jwt.decode(tokens.id_token);
-    db_config_1.default.query('SELECT * FROM users WHERE email', [googleToken.email], (err, result) => {
-        // console.log(result)
-        if (result === null || result === void 0 ? void 0 : result.length) {
-            res.json(tokens);
-        }
-        else {
-            const payload = {
-                firstName: googleToken.given_name,
-                lastName: googleToken.family_name,
-                email: googleToken.email,
-                socialName: googleToken.name,
-                socialPicture: googleToken.picture,
-                token: tokens.id_token,
-                isSocialUser: true
-            };
-            db_config_1.default.query('INSERT INTO users SET ?', Object.assign(Object.assign({}, payload), { password: (0, commonFunctions_1.generateRandomPassword)(5) }), (err, result) => {
-                console.log(result);
-                if (err) {
-                    console.error('Error creating record: ', err);
-                    res.status(500).send('Error creating record');
-                    return;
-                }
-                res.json(tokens);
-            });
-        }
-    });
-    console.log(tokens, googleToken);
-    res.json(tokens);
+    try {
+        const { tokens } = yield oAuth2Client.getToken(req.body.code);
+        const googleToken = jwt.decode(tokens.id_token);
+        db_config_1.default.query('SELECT * FROM users WHERE email = ?', [googleToken.email], (err, result) => {
+            if (err) {
+                console.error('Error checking user: ', err);
+                res.status(500).json({
+                    success: false,
+                    message: 'Error checking user',
+                    error: err.message
+                });
+                return;
+            }
+            if (result.length > 0) {
+                db_config_1.default.query('UPDATE users SET token = ? WHERE id = ?', [tokens.id_token, result[0].id], (updateErr) => {
+                    if (updateErr) {
+                        console.error('Error updating user token: ', updateErr);
+                        res.status(500).json({
+                            success: false,
+                            message: 'Error updating user token',
+                            error: updateErr.message
+                        });
+                        return;
+                    }
+                    res.json({
+                        success: true,
+                        tokens
+                    });
+                });
+            }
+            else {
+                const payload = {
+                    firstName: googleToken.given_name,
+                    lastName: googleToken.family_name,
+                    email: googleToken.email,
+                    socialName: googleToken.name,
+                    socialPicture: googleToken.picture,
+                    token: tokens.id_token,
+                    isSocialUser: true,
+                    password: (0, commonFunctions_1.generateRandomPassword)(5)
+                };
+                db_config_1.default.query('INSERT INTO users SET ?', payload, (insertErr, insertResult) => {
+                    if (insertErr) {
+                        console.error('Error creating user: ', insertErr);
+                        res.status(500).json({
+                            success: false,
+                            message: 'Error creating user',
+                            error: insertErr.message
+                        });
+                        return;
+                    }
+                    res.json({
+                        success: true,
+                        tokens
+                    });
+                });
+            }
+        });
+    }
+    catch (error) {
+        console.error('Google authentication issue: ', error);
+        res.status(400).json({
+            success: false,
+            message: 'Google authentication issue',
+            error: error.message
+        });
+    }
 }));
 exports.default = auth;

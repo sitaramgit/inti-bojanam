@@ -8,6 +8,10 @@ import Link from "@mui/material/Link";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { authService } from "../../services/auth";
+import { useState } from "react";
+import SnackbarMsg from "../../commonUI/snackBar";
+import { httpService } from "../../services/httpService";
+import { API_REQUESTS } from "../../common/apiRequests";
 
 type FormData = {
   firstName: string;
@@ -16,8 +20,14 @@ type FormData = {
   mobile: number;
 };
 
-const SighUp = () => {
+const SignUp = () => {
   const router = useRouter();
+  const [error, setError] = useState<any>({
+    isError: false,
+    message: '',
+    alertType: ''
+   });
+   
   const {
     register,
     setValue,
@@ -26,11 +36,37 @@ const SighUp = () => {
   } = useForm<FormData>();
 
   const onSubmit = handleSubmit((data) => {
-    authService.createUser(data);
+    // authService.createUser(data);
+    createUser(data);
+    
   });
 
+const createUser = async (data: any) => {
+    API_REQUESTS.USER_REGISTER.PAYLOAD = data;
+    try {
+        const request = await httpService(API_REQUESTS.USER_REGISTER);
+        setError({
+            isError: true,
+            message: "Sign successful completed!",
+            alertType: "success",
+          });
+          router.push('/login');
+    } catch (error: any) {
+        console.log(error.response.data.message)
+        setError({
+            isError: true,
+            message: error.response.data.message,
+            alertType: "error",
+          });
+    }
+}
   return (
     <>
+     {error.isError && <SnackbarMsg
+        open={error.isError}
+        message={error.message}
+        alertType={error.alertType}
+      />}
       <Grid container spacing={3}>
         <Grid item xs></Grid>
         <Grid item md={6}>
@@ -131,4 +167,4 @@ const SighUp = () => {
   );
 };
 
-export default SighUp;
+export default SignUp;

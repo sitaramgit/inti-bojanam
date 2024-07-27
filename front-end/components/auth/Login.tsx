@@ -13,7 +13,7 @@ import { authService } from "../../services/auth";
 import { useForm } from "react-hook-form";
 import { httpService } from "../../services/httpService";
 import { API_REQUESTS } from "../../common/apiRequests";
-import SnackbarMsg from "../../commonUI/snakBar";
+import SnackbarMsg from "../../commonUI/snackBar";
 import { useState } from "react";
 
 type FormData = {
@@ -25,7 +25,11 @@ const Login = () => {
 
   const router = useRouter();
   const [expanded, setExpanded] = useState(false);
-   const [error, setError] = useState<boolean>(false);
+   const [error, setError] = useState<any>({
+    isError: false,
+    message: '',
+    alertType: ''
+   });
   const {
     register,
     setValue,
@@ -35,38 +39,50 @@ const Login = () => {
 
   const onSubmit =  handleSubmit((data) => {
     login(data);
-    //  authService.loginUser(data);
   });
   
   const login = async (data: any) => {
     API_REQUESTS.USER_LOGIN.PAYLOAD = data;
     try {
         const request = await httpService(API_REQUESTS.USER_LOGIN);
-        console.log(request);
+        setError({
+          isError: true,
+          message: "Login successful!",
+          alertType: "success",
+        });
     } catch (error) {
         // return <SnackbarMsg/>
-        // setError(true)
+        setError({
+          isError: true,
+          message: "login failed Please enter valid credentials",
+          alertType: "error",
+        });
         console.log(error);
     }
   }
 
   const loginWithGoogle = useGoogleLogin({
     onSuccess: async ({ code }) => {
-      authService.socialLogin(code);
-      API_REQUESTS.SOCIAL_LOGIN.PAYLOAD = {code};
-    try {
+      API_REQUESTS.SOCIAL_LOGIN.PAYLOAD = { code };
+      try {
         const request = await httpService(API_REQUESTS.SOCIAL_LOGIN);
-        console.log(request);
-    } catch (error) {
-        // return <SnackbarMsg/>
-        // setError(true)
-        console.log(error);
-    }
+        setError({
+          isError: true,
+          message: "Login successful!",
+          alertType: "success",
+        });
+      } catch (error) {
+        setError({
+          isError: true,
+          message: "Forbidden: You do not have access.",
+          alertType: "error",
+        });
+      }
     },
     flow: "auth-code",
     onError: (error) => console.log("Login Failed:", error),
   });
-0
+
 
 
   const handleExpandClick = () => {
@@ -80,7 +96,11 @@ const Login = () => {
 
   return (
     <>
-    <SnackbarMsg open={error} message={'login failed'}/>
+      {error.isError && <SnackbarMsg
+        open={error.isError}
+        message={error.message}
+        alertType={error.alertType}
+      />}
       <Grid container spacing={3}>
         <Grid item xs></Grid>
         <Grid item md={6}>
