@@ -1,7 +1,7 @@
 import express from 'express';
 import { Request, Response, NextFunction } from 'express';
 import connection from '../config/db.config';
-import { generateRandomPassword } from '../common/commonFunctions';
+import { generateRandomPassword, generateToken } from '../common/commonFunctions';
 import { OAuth2Client, TokenPayload } from 'google-auth-library';
 const jwt = require('jsonwebtoken');
 
@@ -63,22 +63,18 @@ auth.post('/register', async (req: Request, res: Response) => {
     res.send('hey google')
   })
 
-  auth.post('/login', (req: any, res: any) => {
+  auth.post('/login', async (req: any, res: any) => {
     const {email, password} = req.body;
     
      connection.query('SELECT * FROM users WHERE email = ? and password = ?', [email, password], (err, result: any) => {
-        // console.log(result)
+        console.log(result)
         if(result?.length){
-            const userDeta = result[0];
-            const token = jwt.sign({ id: userDeta.id, email: userDeta.email }, 'your-secret-key', {
-                expiresIn: '8h',
-                });
-                res.status(200).json({ token });
+            const userData = result[0];
+            res.status(200).json({ token: generateToken(userData.id, userData.email)});
         }else{
-            return res.status(401).json({ error: 'Authentication failed' });
+             res.status(401).json({ error: 'Authentication failed' });
         }
         
-        res.send(result)
      });
 
     
@@ -118,11 +114,8 @@ auth.post('/socialLogin', async (req: Request, res: Response) => {
                         });
                         return;
                     }
-
-                    res.json({
-                        success: true,
-                        tokens
-                    });
+                    const userData = result[0];
+                    res.status(200).json({ token: generateToken(userData.id, userData.email)});
                 });
             } else {
                 const payload = {
@@ -144,13 +137,8 @@ auth.post('/socialLogin', async (req: Request, res: Response) => {
                             message: 'Error creating user',
                             error: insertErr.message
                         });
-                        return;
                     }
-
-                    res.json({
-                        success: true,
-                        tokens
-                    });
+                    res.status(200).json({ token: generateToken(insertResult.insertId, googleToken.email)});
                 });
             }
         });

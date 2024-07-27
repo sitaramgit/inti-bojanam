@@ -15,6 +15,8 @@ import { httpService } from "../../services/httpService";
 import { API_REQUESTS } from "../../common/apiRequests";
 import SnackbarMsg from "../../commonUI/snackBar";
 import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { accessToken } from "../../redux/reducer/loginSlice";
 
 type FormData = {
   email: string;
@@ -22,7 +24,7 @@ type FormData = {
 };
 
 const Login = () => {
-
+  const dispatch = useDispatch()
   const router = useRouter();
   const [expanded, setExpanded] = useState(false);
    const [error, setError] = useState<any>({
@@ -45,6 +47,7 @@ const Login = () => {
     API_REQUESTS.USER_LOGIN.PAYLOAD = data;
     try {
         const request = await httpService(API_REQUESTS.USER_LOGIN);
+        dispatch(accessToken(request));
         setError({
           isError: true,
           message: "Login successful!",
@@ -57,7 +60,6 @@ const Login = () => {
           message: "login failed Please enter valid credentials",
           alertType: "error",
         });
-        console.log(error);
     }
   }
 
@@ -66,6 +68,7 @@ const Login = () => {
       API_REQUESTS.SOCIAL_LOGIN.PAYLOAD = { code };
       try {
         const request = await httpService(API_REQUESTS.SOCIAL_LOGIN);
+        dispatch(accessToken(request));
         setError({
           isError: true,
           message: "Login successful!",
