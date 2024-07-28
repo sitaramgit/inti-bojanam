@@ -66,23 +66,25 @@ auth.post('/register', (req, res) => __awaiter(void 0, void 0, void 0, function*
 auth.get('/', (req, res) => {
     res.send('hey google');
 });
-auth.post('/login', (req, res) => {
+auth.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = req.body;
     db_config_1.default.query('SELECT * FROM users WHERE email = ? and password = ?', [email, password], (err, result) => {
-        // console.log(result)
         if (result === null || result === void 0 ? void 0 : result.length) {
-            const userDeta = result[0];
-            const token = jwt.sign({ id: userDeta.id, email: userDeta.email }, 'your-secret-key', {
-                expiresIn: '8h',
+            const userData = result[0];
+            res.status(200).json({
+                id: userData.id,
+                firstName: userData.firstName,
+                lastName: userData.lastName,
+                socialPicture: userData.socialPicture,
+                isSocialUser: userData.isSocialUser,
+                token: (0, commonFunctions_1.generateToken)(userData.id, userData.email)
             });
-            res.status(200).json({ token });
         }
         else {
-            return res.status(401).json({ error: 'Authentication failed' });
+            res.status(401).json({ error: 'Authentication failed' });
         }
-        res.send(result);
     });
-});
+}));
 const oAuth2Client = new google_auth_library_1.OAuth2Client(process.env.CLIENT_ID, process.env.CLIENT_SECRET, 'postmessage');
 auth.post('/socialLogin', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -109,10 +111,16 @@ auth.post('/socialLogin', (req, res) => __awaiter(void 0, void 0, void 0, functi
                         });
                         return;
                     }
-                    res.json({
-                        success: true,
-                        tokens
+                    const userData = result[0];
+                    res.status(200).json({
+                        id: userData.id,
+                        firstName: userData.firstName,
+                        lastName: userData.lastName,
+                        socialPicture: userData.socialPicture,
+                        isSocialUser: userData.isSocialUser,
+                        token: (0, commonFunctions_1.generateToken)(userData.id, userData.email)
                     });
+                    // res.status(200).json({ token: generateToken(userData.id, userData.email)});
                 });
             }
             else {
@@ -134,12 +142,16 @@ auth.post('/socialLogin', (req, res) => __awaiter(void 0, void 0, void 0, functi
                             message: 'Error creating user',
                             error: insertErr.message
                         });
-                        return;
                     }
-                    res.json({
-                        success: true,
-                        tokens
+                    res.status(200).json({
+                        id: insertResult.insertId,
+                        firstName: googleToken.given_name,
+                        lastName: googleToken.family_name,
+                        socialPicture: googleToken.socialPicture,
+                        isSocialUser: 1,
+                        token: (0, commonFunctions_1.generateToken)(insertResult.insertId, googleToken.email)
                     });
+                    // res.status(200).json({ token: generateToken(insertResult.insertId, googleToken.email)});
                 });
             }
         });

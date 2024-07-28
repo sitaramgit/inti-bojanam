@@ -8,9 +8,23 @@ const db_config_1 = __importDefault(require("./config/db.config"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const auth_1 = __importDefault(require("./controller/auth"));
+const corsOpts = {
+    origin: '*',
+    methods: [
+        'GET',
+        'POST',
+    ],
+    allowedHeaders: [
+        'Content-Type',
+    ],
+};
 const app = (0, express_1.default)();
 const cors = require('cors');
-app.use(cors());
+app.use(cors({
+    origin: ['https://localhost', 'http://localhost:3001'], // Add the origin you are testing from
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(body_parser_1.default.json());
 app.use(body_parser_1.default.urlencoded({ extended: true }));
 dotenv_1.default.config();

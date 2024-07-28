@@ -1,11 +1,12 @@
 import { useRouter } from "next/router";
 import { useEffect } from "react";
+import { useSelector } from "react-redux";
 
-const ProtectedRouts = ({Children}: any) => {
+const ProtectedRouts = ( {children}: any ) => {
     const router = useRouter();
     const unProtectedRoutes = ['/login', 'sign-up'];
-    const isAuthenticated = true;
-    const pathIsProtected = true;
+    const isAuthenticated = useSelector((state: any) => state.login?.userDetails?.token);
+    const pathIsProtected = unProtectedRoutes.indexOf(router.pathname) !== -1;
 
     useEffect(() => {
         if(!isAuthenticated){
@@ -15,7 +16,7 @@ const ProtectedRouts = ({Children}: any) => {
         }
 
     }, [isAuthenticated, pathIsProtected])
-    return Children;
+    return children;
 
 }
 export default ProtectedRouts;
