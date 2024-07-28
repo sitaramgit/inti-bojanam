@@ -3,7 +3,7 @@ import { createSlice } from '@reduxjs/toolkit'
 export const loginSlice = createSlice({
   name: 'login',
   initialState: {
-    token: '',
+    userDetails: {},
   },
   reducers: {
     accessToken: (state, action: any) => {
@@ -12,7 +12,7 @@ export const loginSlice = createSlice({
       // which detects changes to a "draft state" and produces a brand new
       // immutable state based off those changes.
       // Also, no return statement is required from these functions.
-      state.token = action?.payload?.token;
+      state.userDetails = action?.payload;
     }
   },
 })

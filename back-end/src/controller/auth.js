@@ -69,10 +69,16 @@ auth.get('/', (req, res) => {
 auth.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = req.body;
     db_config_1.default.query('SELECT * FROM users WHERE email = ? and password = ?', [email, password], (err, result) => {
-        console.log(result);
         if (result === null || result === void 0 ? void 0 : result.length) {
             const userData = result[0];
-            res.status(200).json({ token: (0, commonFunctions_1.generateToken)(userData.id, userData.email) });
+            res.status(200).json({
+                id: userData.id,
+                firstName: userData.firstName,
+                lastName: userData.lastName,
+                socialPicture: userData.socialPicture,
+                isSocialUser: userData.isSocialUser,
+                token: (0, commonFunctions_1.generateToken)(userData.id, userData.email)
+            });
         }
         else {
             res.status(401).json({ error: 'Authentication failed' });
@@ -106,7 +112,15 @@ auth.post('/socialLogin', (req, res) => __awaiter(void 0, void 0, void 0, functi
                         return;
                     }
                     const userData = result[0];
-                    res.status(200).json({ token: (0, commonFunctions_1.generateToken)(userData.id, userData.email) });
+                    res.status(200).json({
+                        id: userData.id,
+                        firstName: userData.firstName,
+                        lastName: userData.lastName,
+                        socialPicture: userData.socialPicture,
+                        isSocialUser: userData.isSocialUser,
+                        token: (0, commonFunctions_1.generateToken)(userData.id, userData.email)
+                    });
+                    // res.status(200).json({ token: generateToken(userData.id, userData.email)});
                 });
             }
             else {
@@ -129,7 +143,15 @@ auth.post('/socialLogin', (req, res) => __awaiter(void 0, void 0, void 0, functi
                             error: insertErr.message
                         });
                     }
-                    res.status(200).json({ token: (0, commonFunctions_1.generateToken)(insertResult.insertId, googleToken.email) });
+                    res.status(200).json({
+                        id: insertResult.insertId,
+                        firstName: googleToken.given_name,
+                        lastName: googleToken.family_name,
+                        socialPicture: googleToken.socialPicture,
+                        isSocialUser: 1,
+                        token: (0, commonFunctions_1.generateToken)(insertResult.insertId, googleToken.email)
+                    });
+                    // res.status(200).json({ token: generateToken(insertResult.insertId, googleToken.email)});
                 });
             }
         });

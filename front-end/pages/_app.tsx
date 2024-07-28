@@ -5,6 +5,7 @@ import type { AppProps, AppType } from 'next/app'
 import { Provider } from 'react-redux';
 import store from '../redux/store';
 import ProtectedRouts from '../components/ProtectedRouts';
+import BottomNav from '../components/after-login/BottomNav';
 
 type MyAppProps = AppProps & {
   Component: AppType & {

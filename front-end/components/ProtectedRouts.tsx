@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 const ProtectedRouts = ( {children}: any ) => {
     const router = useRouter();
     const unProtectedRoutes = ['/login', 'sign-up'];
-    const isAuthenticated = useSelector((state: any) => state.login.token);
+    const isAuthenticated = useSelector((state: any) => state.login?.userDetails?.token);
     const pathIsProtected = unProtectedRoutes.indexOf(router.pathname) !== -1;
 
     useEffect(() => {

@@ -67,10 +67,18 @@ auth.post('/register', async (req: Request, res: Response) => {
     const {email, password} = req.body;
     
      connection.query('SELECT * FROM users WHERE email = ? and password = ?', [email, password], (err, result: any) => {
-        console.log(result)
         if(result?.length){
             const userData = result[0];
-            res.status(200).json({ token: generateToken(userData.id, userData.email)});
+            res.status(200).json(
+                {
+                    id: userData.id,
+                    firstName: userData.firstName, 
+                    lastName: userData.lastName,
+                    socialPicture: userData.socialPicture,
+                    isSocialUser:userData.isSocialUser,
+                    token: generateToken(userData.id, userData.email)
+                }
+            );
         }else{
              res.status(401).json({ error: 'Authentication failed' });
         }
@@ -115,7 +123,17 @@ auth.post('/socialLogin', async (req: Request, res: Response) => {
                         return;
                     }
                     const userData = result[0];
-                    res.status(200).json({ token: generateToken(userData.id, userData.email)});
+                    res.status(200).json(
+                        {
+                            id: userData.id,
+                            firstName: userData.firstName, 
+                            lastName: userData.lastName,
+                            socialPicture: userData.socialPicture,
+                            isSocialUser:userData.isSocialUser,
+                            token: generateToken(userData.id, userData.email)
+                        }
+                    );
+                    // res.status(200).json({ token: generateToken(userData.id, userData.email)});
                 });
             } else {
                 const payload = {
@@ -138,7 +156,17 @@ auth.post('/socialLogin', async (req: Request, res: Response) => {
                             error: insertErr.message
                         });
                     }
-                    res.status(200).json({ token: generateToken(insertResult.insertId, googleToken.email)});
+                    res.status(200).json(
+                        {
+                            id: insertResult.insertId,
+                            firstName: googleToken.given_name, 
+                            lastName: googleToken.family_name,
+                            socialPicture: googleToken.socialPicture,
+                            isSocialUser: 1,
+                            token: generateToken(insertResult.insertId, googleToken.email)
+                        }
+                    );
+                    // res.status(200).json({ token: generateToken(insertResult.insertId, googleToken.email)});
                 });
             }
         });

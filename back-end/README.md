@@ -27,25 +27,8 @@ https://eu02.herohosty.com:2083/
 cPanel
 intiboja
 Sitaram$0279
-I just installed #phpMyAdmin on https://intibojanam.xyz via #Softaculous #PHP
-Generating public/private rsa key pair.
-Enter passphrase (empty for no passphrase): 
-Enter same passphrase again: 
-Your identification has been saved in /home/intiboja/.ssh/id_rsa.
-Your public key has been saved in /home/intiboja/.ssh/id_rsa.pub.
-The key fingerprint is:
-SHA256:4Md0gC18zt6p5fZN+mt/YRgFAlMmp5cpKavHGTLgl1E 
-The key's randomart image is:
-+---[RSA 4096]----+
-|     . E.+o= ..  |
-|      = o.B +  . |
-|   . ..*.+.+  .  |
-|  . ..o+=.o  .   |
-|   . =.+S. .  o  |
-|    . =.+ +  . o |
-|     . + +    o .|
-|      . . o  +. .|
-|         . .oo+oo|
-+----[SHA256]-----+
+
+source /home/intiboja/nodevenv/dev/10/bin/activate && cd /home/intiboja/dev
+Enter to the virtual environment.To enter to virtual environment, run the command: source /home/intiboja/nodevenv/dev/10/bin/activate && cd /home/intiboja/dev
 
 mysql -u intiboja_sitaram -p

@@ -5,11 +5,26 @@ import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 import auth from './controller/auth';
 
+const corsOpts = {
+  origin: '*',
 
+  methods: [
+    'GET',
+    'POST',
+  ],
+
+  allowedHeaders: [
+    'Content-Type',
+  ],
+};
 
 const app = express();
 const cors = require('cors')
-app.use(cors())
+app.use(cors({
+  origin: ['https://localhost', 'http://localhost:3001'], // Add the origin you are testing from
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}))
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 dotenv.config();
